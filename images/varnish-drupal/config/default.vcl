@@ -31,9 +31,8 @@ sub vcl_init {
 # This configuration is optimized for Drupal hosting:
 # Respond to incoming requests.
 sub vcl_recv {
-  if (req.url ~ "^/varnish_status$")  {
-    return (synth(200,"OK"));
-  }
+  include "recv.vcl";
+
   # set the backend, which should be used:
   set req.backend_hint = www_dir.backend("${VARNISH_BACKEND_HOST:-nginx}");
 

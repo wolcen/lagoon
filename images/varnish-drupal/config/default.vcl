@@ -21,6 +21,7 @@ acl purge {
 }
 
 sub vcl_init {
+  include "init.vcl";
   new www_dir = dynamic.director(
     port = "${VARNISH_BACKEND_PORT:-8080}",
     first_byte_timeout = 90s,
@@ -32,6 +33,10 @@ sub vcl_init {
 # Respond to incoming requests.
 sub vcl_recv {
   include "recv.vcl";
+
+  if (req.url ~ "^/varnish_status$")  {
+  return (synth(200,"OK"));
+}
 
   # set the backend, which should be used:
   set req.backend_hint = www_dir.backend("${VARNISH_BACKEND_HOST:-nginx}");
@@ -250,6 +255,7 @@ sub vcl_recv {
 }
 
 sub vcl_pipe {
+  include "pipe.vcl";
   # Support for Websockets
   if (req.http.upgrade) {
       set bereq.http.upgrade = req.http.upgrade;
@@ -258,6 +264,7 @@ sub vcl_pipe {
 }
 
 sub vcl_hit {
+  include "hit.vcl";
     if (obj.ttl >= 0s) {
         # normal hit
         return (deliver);
@@ -286,6 +293,7 @@ sub vcl_hit {
 }
 
 sub vcl_backend_response {
+  include "beresp.vcl";
   # Allow items to be stale if needed.
   set beresp.grace = 6h;
 
@@ -331,6 +339,7 @@ sub vcl_backend_response {
 
 # Set a header to track a cache HIT/MISS.
 sub vcl_deliver {
+  include "deliver.vcl";
   if (obj.hits > 0) {
     set resp.http.X-Varnish-Cache = "HIT";
   }
@@ -358,6 +367,7 @@ sub vcl_deliver {
 }
 
 sub vcl_hash {
+  include "hash.vcl";
      hash_data(req.url);
      if (req.http.host) {
          hash_data(req.http.host);
@@ -374,6 +384,7 @@ sub vcl_hash {
 }
 
 sub vcl_synth {
+  include "synth.vcl";
   if (resp.status == 701) {
     set resp.status = 401;
     set resp.http.Content-Type = "text/plain; charset=utf-8";
@@ -391,6 +402,7 @@ sub vcl_synth {
 }
 
 sub vcl_backend_error {
+  include "beerr.vcl";
     # Restart the request, when we have a backend server error, to try another backend.
     # Restart max twice.
     if (bereq.retries < 2) {

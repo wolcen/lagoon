@@ -166,7 +166,15 @@ logs: ## Show Lagoon service logs
 	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) logs --tail=10 -f $(service)
 
 up: ## Start all Lagoon services
-	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d
+ifeq ($(ARCH), darwin)
+		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d
+else
+	# hack for linux to obtain the localhost IP
+	# we don't have a docker host DNS until this PR is merged: https://github.com/moby/moby/pull/40007
+	KEYCLOAK_URL=$$(docker network inspect -f '{{(index .IPAM.Config 0).Gateway}}' bridge):8088 \
+		IMAGE_REPO=$(CI_BUILD_TAG) \
+		docker-compose -p $(CI_BUILD_TAG) up -d
+endif
 	sleep 20
 	while ! docker exec "$$(docker-compose -p $(CI_BUILD_TAG) ps -q logs-db)" ./securityadmin_demo.sh; do sleep 5; done
 

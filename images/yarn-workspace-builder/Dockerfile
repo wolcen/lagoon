@@ -18,6 +18,7 @@ COPY services/logs2slack/package.json /app/services/logs2slack/
 COPY services/openshiftbuilddeploy/package.json /app/services/openshiftbuilddeploy/
 COPY services/openshiftbuilddeploymonitor/package.json /app/services/openshiftbuilddeploymonitor/
 COPY services/openshiftremove/package.json /app/services/openshiftremove/
+COPY services/kubernetesbuilddeploy/package.json /app/services/kubernetesbuilddeploy/
 COPY services/rest2tasks/package.json /app/services/rest2tasks/
 COPY services/webhook-handler/package.json /app/services/webhook-handler/
 COPY services/webhooks2tasks/package.json /app/services/webhooks2tasks/

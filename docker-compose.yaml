@@ -434,54 +434,54 @@ services:
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-clair/harbor-clair.yml
-      lagoon.image: amazeeiolagoon/harbor-clair:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-clair:pr-1495
   harbor-core:
     image: ${IMAGE_REPO:-lagoon}/harbor-core
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-core/harbor-core.yml
-      lagoon.image: amazeeiolagoon/harbor-core:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-core:pr-1495
   harbor-database:
     image: ${IMAGE_REPO:-lagoon}/harbor-database
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-database/harbor-database.yml
-      lagoon.image: amazeeiolagoon/harbor-database:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-database:pr-1495
   harbor-jobservice:
     image: ${IMAGE_REPO:-lagoon}/harbor-jobservice
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-jobservice/harbor-jobservice.yml
-      lagoon.image: amazeeiolagoon/harbor-jobservice:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-jobservice:pr-1495
   harbor-nginx:
     image: ${IMAGE_REPO:-lagoon}/harbor-nginx
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-nginx/harbor-nginx.yml
-      lagoon.image: amazeeiolagoon/harbor-nginx:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-nginx:pr-1495
   harbor-portal:
     image: ${IMAGE_REPO:-lagoon}/harbor-portal
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-portal/harbor-portal.yml
-      lagoon.image: amazeeiolagoon/harbor-portal:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-portal:pr-1495
   harbor-redis:
     image: ${IMAGE_REPO:-lagoon}/harbor-redis
     labels:
       lagoon.type: custom
       lagoon.template: services/harbor-redis/harbor-redis.yml
-      lagoon.image: amazeeiolagoon/harbor-redis:v1-1-4
+      lagoon.image: amazeeiolagoon/harbor-redis:pr-1495
   harborregistry:
     image: ${IMAGE_REPO:-lagoon}/harborregistry
     labels:
       lagoon.type: custom
       lagoon.template: services/harborregistry/harborregistry.yml
       lagoon.name: harborregistry
-      lagoon.image: amazeeiolagoon/harborregistry:v1-1-4
+      lagoon.image: amazeeiolagoon/harborregistry:pr-1495
   harborregistryctl:
     image: ${IMAGE_REPO:-lagoon}/harborregistryctl
     labels:
       lagoon.type: custom
       lagoon.template: services/harborregistryctl/harborregistry.yml
       lagoon.name: harborregistry
-      lagoon.image: amazeeiolagoon/harborregistryctl:v1-1-4
+      lagoon.image: amazeeiolagoon/harborregistryctl:pr-1495

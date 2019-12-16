@@ -115,6 +115,16 @@ objects:
             timeout: 3000ms
             threshold: 5
             backoff: 1s
+            ignoredmediatypes:
+              - application/vnd.docker.image.rootfs.diff.tar.gzip
+              - application/vnd.docker.image.rootfs.foreign.diff.tar.gzip
+              - application/vnd.oci.image.layer.v1.tar
+              - application/vnd.oci.image.layer.v1.tar+gzip
+              - application/vnd.oci.image.layer.v1.tar+zstd
+              - application/vnd.oci.image.layer.nondistributable.v1.tar
+              - application/vnd.oci.image.layer.nondistributable.v1.tar+gzip
+              - application/vnd.oci.image.layer.nondistributable.v1.tar+zstd
+              - application/octet-stream
     ctl-config.yml: |
       ---
       protocol: "http"
@@ -160,6 +170,8 @@ objects:
           branch: ${SAFE_BRANCH}
           project: ${SAFE_PROJECT}
       spec:
+        securityContext:
+          fsGroup: 10000
         containers:
         - name: ${HARBORREGISTRY_SERVICE_NAME}
           image: ${HARBORREGISTRY_SERVICE_IMAGE}

@@ -23,7 +23,7 @@ node {
         }
 
         stage ('build images') {
-          sh "make build -j6"
+          sh "make build:all -j6"
         }
 
         openshift_versions.each { openshift_version ->
@@ -45,14 +45,14 @@ node {
               'start minishift': {
                 stage ('start minishift') {
                   sh 'make minishift/cleanall || echo'
-                  sh "make minishift MINISHIFT_CPUS=12 MINISHIFT_MEMORY=64GB MINISHIFT_DISK_SIZE=50GB MINISHIFT_VERSION=${minishift_version} OPENSHIFT_VERSION=${openshift_version}"
+                  sh "make minishift/start MINISHIFT_CPUS=12 MINISHIFT_MEMORY=64GB MINISHIFT_DISK_SIZE=50GB MINISHIFT_VERSION=${minishift_version} OPENSHIFT_VERSION=${openshift_version}"
                 }
               },
               'push images to amazeeiolagoon': {
                 stage ('push images to amazeeiolagoon/*') {
                   withCredentials([string(credentialsId: 'amazeeiojenkins-dockerhub-password', variable: 'PASSWORD')]) {
                     sh 'docker login -u amazeeiojenkins -p $PASSWORD'
-                    sh "make publish-amazeeiolagoon-baseimages publish-amazeeiolagoon-serviceimages BRANCH_NAME=${SAFEBRANCH_NAME} -j4"
+                    sh "make publish:amazeeiolagoon-baseimages publish:amazeeiolagoon-serviceimages BRANCH_NAME=${SAFEBRANCH_NAME} -j4"
                   }
                 }
               }
@@ -67,7 +67,7 @@ node {
             "_tests_${openshift_version}": {
                 stage ('run tests') {
                   try {
-                    sh "make push-minishift -j5"
+                    sh "make build:push-minishift -j5"
                     sh "make up"
                     sh "make tests -j2"
                   } catch (e) {
@@ -90,14 +90,14 @@ node {
           stage ('publish-amazeeio') {
             withCredentials([string(credentialsId: 'amazeeiojenkins-dockerhub-password', variable: 'PASSWORD')]) {
               sh 'docker login -u amazeeiojenkins -p $PASSWORD'
-              sh "make publish-amazeeio-baseimages -j4"
+              sh "make publish:amazeeio-baseimages -j4"
             }
           }
         }
 
         if (env.BRANCH_NAME == 'master') {
           stage ('save-images-s3') {
-            sh "make s3-save -j8"
+            sh "make build:s3-save -j8"
           }
         }
 

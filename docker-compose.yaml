@@ -500,6 +500,17 @@ services:
       - RABBITMQ_USER=guest
       - RABBITMQ_PASS=guest
       - CLUSTER_NAME=local_development_cluster
+      - KUBERNETES_SERVICE_HOST=192.168.42.92
+      - KUBERNETES_SERVICE_PORT=8443
+    volumes:
+      - type: bind
+        source: ./fluentd.token
+        target: /run/secrets/kubernetes.io/serviceaccount/token
+        read_only: true
+      - type: bind
+        source: ./fluentd.ca.crt
+        target: /run/secrets/kubernetes.io/serviceaccount/ca.crt
+        read_only: true
   logs-dispatcher:
     image: ${IMAGE_REPO:-lagoon}/logs-dispatcher
     user: '111111111'

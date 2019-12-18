@@ -54,7 +54,7 @@
 4. Rebuild/restart the containers
 
 ```
-$ rm build/api && make build/api && docker-compose restart api
+$ make build:api && docker-compose restart api
 ```
 
 5. Restart vscode

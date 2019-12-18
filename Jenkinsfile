@@ -22,7 +22,12 @@ node {
           sh "git fetch --tags"
         }
 
-        stage ('build images') {
+        stage ('pull base images') {
+          sh "make build:pull"
+          sh "cat pull-report.json"
+        }
+
+        stage ('build lagoon images') {
           sh "make build:all -j6"
         }
 

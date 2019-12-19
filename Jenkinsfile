@@ -44,7 +44,6 @@ node {
                 stage ('start services') {
                   sh "make kill"
                   sh "make up"
-                  sh "sleep 60"
                 }
               },
               'start minishift': {

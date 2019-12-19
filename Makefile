@@ -108,20 +108,36 @@ tests-list: ## List all tests
 # Define a list of which Lagoon Services are needed for running any deployment testing
 deployment-test-services-main = broker openshiftremove openshiftbuilddeploy openshiftbuilddeploymonitor logs2email logs2slack logs2rocketchat logs2microsoftteams api api-db keycloak keycloak-db ssh auth-server local-git local-api-data-watcher-pusher tests
 
+# These targets are used as dependencies to bring up containers in the right order.
+.PHONY: test-services-main
+test-services-main:
+	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d $(deployment-test-services-main)
+
+.PHONY: test-services-rest
+test-services-rest: test-services-main
+	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d rest2tasks
+
+.PHONY: test-services-drupal
+test-services-drupal: test-services-rest
+	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d drush-alias
+
+.PHONY: test-services-webhooks
+test-services-webhooks: test-services-main
+	IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d webhook-handler webhooks2tasks
+
 # All Tests that use REST endpoints
 rest-tests = rest node features nginx elasticsearch
 run-rest-tests = $(foreach image,$(rest-tests),tests/$(image))
 # List of Lagoon Services needed for REST endpoint testing
 deployment-test-services-rest = $(deployment-test-services-main) rest2tasks
 .PHONY: $(run-rest-tests)
-$(run-rest-tests): minishift build\:node-6-builder build\:node-8-builder build\:oc-build-deploy-dind build\:broker-single $(foreach image,$(deployment-test-services-rest),build\:$(image)) build\:push-minishift
+$(run-rest-tests): minishift build\:node-6-builder build\:node-8-builder build\:oc-build-deploy-dind build\:broker-single $(foreach image,$(deployment-test-services-rest),build\:$(image)) build\:push-minishift test-services-rest
 		$(eval testname = $(subst tests/,,$@))
-		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d $(deployment-test-services-rest)
 		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) run --rm tests ansible-playbook /ansible/tests/$(testname).yaml $(testparameter)
 
-tests/drupal tests/drupal-postgres tests/drupal-galera: minishift build\:varnish-drupal build\:solr-5.5-drupal build\:nginx-drupal build\:redis build\:php-5.6-cli-drupal build\:php-7.0-cli-drupal build\:php-7.1-cli-drupal build\:php-7.2-cli-drupal build\:php-7.3-cli-drupal build\:php-7.4-cli-drupal build\:api-db build\:postgres-drupal build\:mariadb-drupal build\:postgres-ckan build\:oc-build-deploy-dind $(foreach image,$(deployment-test-services-rest),build\:$(image)) build\:drush-alias build\:push-minishift
+.PHONY: tests/drupal tests/drupal-postgres tests/drupal-galera
+tests/drupal tests/drupal-postgres tests/drupal-galera: minishift build\:varnish-drupal build\:solr-5.5-drupal build\:nginx-drupal build\:redis build\:php-5.6-cli-drupal build\:php-7.0-cli-drupal build\:php-7.1-cli-drupal build\:php-7.2-cli-drupal build\:php-7.3-cli-drupal build\:php-7.4-cli-drupal build\:api-db build\:postgres-drupal build\:mariadb-drupal build\:postgres-ckan build\:oc-build-deploy-dind $(foreach image,$(deployment-test-services-rest),build\:$(image)) build\:drush-alias build\:push-minishift test-services-drupal
 		$(eval testname = $(subst tests/,,$@))
-		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d $(deployment-test-services-rest) drush-alias
 		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) run --rm tests ansible-playbook /ansible/tests/$(testname).yaml $(testparameter)
 
 # All tests that use Webhook endpoints
@@ -130,9 +146,8 @@ run-webhook-tests = $(foreach image,$(webhook-tests),tests/$(image))
 # List of Lagoon Services needed for webhook endpoint testing
 deployment-test-services-webhooks = $(deployment-test-services-main) webhook-handler webhooks2tasks
 .PHONY: $(run-webhook-tests)
-$(run-webhook-tests): minishift build\:node-6-builder build\:node-8-builder build\:oc-build-deploy-dind $(foreach image,$(deployment-test-services-webhooks),build\:$(image)) build\:push-minishift
+$(run-webhook-tests): minishift build\:node-6-builder build\:node-8-builder build\:oc-build-deploy-dind $(foreach image,$(deployment-test-services-webhooks),build\:$(image)) build\:push-minishift test-services-webhooks
 		$(eval testname = $(subst tests/,,$@))
-		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) up -d $(deployment-test-services-webhooks)
 		IMAGE_REPO=$(CI_BUILD_TAG) docker-compose -p $(CI_BUILD_TAG) run --rm tests ansible-playbook /ansible/tests/$(testname).yaml $(testparameter)
 
 
